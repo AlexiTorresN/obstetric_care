@@ -1,0 +1,124 @@
+{% extends 'Shared/base.html' %}
+{% load static %}
+
+{% block title %}Editar Patología - {{ patologia.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square"></i>
+                        Editar Patología
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Está editando la patología: <strong>{{ patologia.nombre }}</strong>
+                    </div>
+                    
+                    <form method="POST" id="form-editar-patologia" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                {{ form.nombre.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">{{ form.nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Código CIE-10 -->
+                        <div class="mb-3">
+                            <label for="{{ form.codigo_cie_10.id_for_label }}" class="form-label">
+                                {{ form.codigo_cie_10.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.codigo_cie_10 }}
+                            {% if form.codigo_cie_10.errors %}
+                                <div class="invalid-feedback d-block">{{ form.codigo_cie_10.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                {{ form.descripcion.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Nivel de Riesgo y Estado -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.nivel_de_riesgo.id_for_label }}" class="form-label">
+                                    {{ form.nivel_de_riesgo.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.nivel_de_riesgo }}
+                                {% if form.nivel_de_riesgo.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.nivel_de_riesgo.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                    {{ form.estado.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.estado.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Protocolo de Seguimiento -->
+                        <div class="mb-3">
+                            <label for="{{ form.protocologo_de_segimiento.id_for_label }}" class="form-label">
+                                {{ form.protocologo_de_segimiento.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.protocologo_de_segimiento }}
+                            {% if form.protocologo_de_segimiento.errors %}
+                                <div class="invalid-feedback d-block">{{ form.protocologo_de_segimiento.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'medico:detalle_patologia' patologia.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('form-editar-patologia').addEventListener('submit', function(e) {
+        const form = this;
+        
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+</script>
+{% endblock %}

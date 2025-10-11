@@ -1,0 +1,97 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-hospital"></i>
+            Sistema Obstétrico
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <!-- Gestión de Personas -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-people"></i> Gestión
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'gestion:registrar_persona' %}">
+                            <i class="bi bi-person-plus"></i> Registrar Persona
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'gestion:lista_personas' %}">
+                            <i class="bi bi-list"></i> Lista de Personas
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'gestion:registrar_medico' %}">
+                            <i class="bi bi-clipboard-pulse"></i> Registrar Médico
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'gestion:registrar_matrona' %}">
+                            <i class="bi bi-heart-pulse"></i> Registrar Matrona
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'gestion:registrar_tens' %}">
+                            <i class="bi bi-bandaid"></i> Registrar TENS
+                        </a></li>
+                    </ul>
+                </li>
+                
+                <!-- Pacientes -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-heart"></i> Pacientes
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'matrona:registrar_paciente' %}">
+                            <i class="bi bi-person-plus-fill"></i> Registrar Paciente
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'matrona:registrar_ingreso' %}">
+                            <i class="bi bi-door-open"></i> Registrar Ingreso
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'matrona:buscar_paciente' %}">
+                            <i class="bi bi-search"></i> Buscar Paciente
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'matrona:lista_pacientes' %}">
+                            <i class="bi bi-list-ul"></i> Lista de Pacientes
+                        </a></li>
+                    </ul>
+                </li>
+                
+                <!-- Patologías -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-file-medical"></i> Patologías
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'medico:registrar_patologia' %}">
+                            <i class="bi bi-plus-circle"></i> Registrar Patología
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'medico:lista_patologias' %}">
+                            <i class="bi bi-journal-medical"></i> Catálogo de Patologías
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <!-- Usuario -->
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> Usuario
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">
+                            <i class="bi bi-gear"></i> Configuración
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

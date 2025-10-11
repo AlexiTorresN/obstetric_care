@@ -1,0 +1,443 @@
+{% extends 'Shared/base.html' %}
+{% load static %}
+
+{% block title %}Ficha Paciente - {{ paciente.persona.Nombre }} {{ paciente.persona.Apellido }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header con información del paciente -->
+            <div class="card mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="mb-0">
+                                <i class="bi bi-person-badge"></i>
+                                {{ paciente.persona.Nombre }} {{ paciente.persona.Apellido }}
+                            </h3>
+                            <small>RUT: {{ paciente.persona.Rut }}</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'matrona:editar_paciente' paciente.pk %}" 
+                               class="btn btn-light btn-sm">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a href="{% url 'matrona:lista_pacientes' %}" 
+                               class="btn btn-light btn-sm">
+                                <i class="bi bi-arrow-left"></i> Volver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Columna 1: Datos Personales -->
+                        <div class="col-md-4">
+                            <h5><i class="bi bi-person-fill"></i> Datos Personales</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Edad:</th>
+                                    <td>{{ paciente.Edad }} años</td>
+                                </tr>
+                                <tr>
+                                    <th>Sexo:</th>
+                                    <td>{{ paciente.persona.get_Sexo_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha Nac.:</th>
+                                    <td>{{ paciente.persona.Fecha_nacimiento|date:"d/m/Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Estado Civil:</th>
+                                    <td>{{ paciente.get_Estado_civil_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Columna 2: Contacto -->
+                        <div class="col-md-4">
+                            <h5><i class="bi bi-telephone-fill"></i> Contacto</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Teléfono:</th>
+                                    <td>{{ paciente.persona.Telefono|default:"No registrado" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ paciente.persona.Email|default:"No registrado" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección:</th>
+                                    <td>{{ paciente.persona.Direccion|default:"No registrado" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Emergencia:</th>
+                                    <td>{{ paciente.Contacto_emergencia|default:"No registrado" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Columna 3: Información Médica -->
+                        <div class="col-md-4">
+                            <h5><i class="bi bi-hospital-fill"></i> Información Médica</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Previsión:</th>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ paciente.get_Previcion_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Acompañante:</th>
+                                    <td>{{ paciente.Acompañante|default:"No registrado" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha Registro:</th>
+                                    <td>{{ paciente.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Estado:</th>
+                                    <td>
+                                        {% if paciente.activo %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs para diferentes secciones -->
+            <ul class="nav nav-tabs" id="fichaTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="ingresos-tab" data-bs-toggle="tab" 
+                            data-bs-target="#ingresos" type="button">
+                        <i class="bi bi-door-open"></i> Ingresos Hospitalarios
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="patologias-tab" data-bs-toggle="tab" 
+                            data-bs-target="#patologias" type="button">
+                        <i class="bi bi-file-medical"></i> Patologías
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="historial-tab" data-bs-toggle="tab" 
+                            data-bs-target="#historial" type="button">
+                        <i class="bi bi-clock-history"></i> Historial Clínico
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content border border-top-0 p-3" id="fichaTabsContent">
+                <!-- Tab: Ingresos -->
+                <div class="tab-pane fade show active" id="ingresos" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Ingresos Hospitalarios</h5>
+                        <a href="{% url 'matrona:registrar_ingreso' %}?rut={{ paciente.persona.Rut }}" 
+                           class="btn btn-success btn-sm">
+                            <i class="bi bi-plus-circle"></i> Nuevo Ingreso
+                        </a>
+                    </div>
+                    
+                    {% if paciente.ingresos.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nº Ficha</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th>Motivo</th>
+                                    <th>Edad Gestacional</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ingreso in paciente.ingresos.all %}
+                                <tr>
+                                    <td><strong>{{ ingreso.numero_ficha }}</strong></td>
+                                    <td>{{ ingreso.fecha_ingreso|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ ingreso.motivo_consulta|truncatewords:10 }}</td>
+                                    <td>
+                                        {% if ingreso.edad_gestacional_sem %}
+                                            {{ ingreso.edad_gestacional_sem }} semanas
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">En curso</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'matrona:detalle_ingreso' ingreso.pk %}" 
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        No hay ingresos registrados para este paciente.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Tab: Patologías -->
+                <div class="tab-pane fade" id="patologias" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Patologías Asignadas</h5>
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" 
+                                data-bs-target="#modalAsignarPatologia">
+                            <i class="bi bi-plus-circle"></i> Asignar Patología
+                        </button>
+                    </div>
+                    
+                    {% if paciente.patologias_asignadas.all %}
+                    <div class="row">
+                        {% for patologia in paciente.patologias_asignadas.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ patologia.nombre }}</h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <strong>CIE-10:</strong> {{ patologia.codigo_cie_10 }}<br>
+                                            <strong>Asignado:</strong> {{ patologia.creado_en|date:"d/m/Y" }}
+                                        </small>
+                                    </p>
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            onclick="eliminarPatologia({{ patologia.pk }})">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        No hay patologías asignadas a este paciente.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Tab: Historial -->
+                <div class="tab-pane fade" id="historial" role="tabpanel">
+                    <h5 class="mb-3">Historial Clínico Completo</h5>
+                    
+                    {% if paciente.ingresos.all %}
+                    <div class="timeline">
+                        {% for ingreso in paciente.ingresos.all %}
+                        <div class="card mb-3 border-start border-primary border-4">
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <i class="bi bi-calendar-check text-primary"></i>
+                                        <strong>{{ ingreso.numero_ficha }}</strong> - 
+                                        {{ ingreso.fecha_ingreso|date:"d/m/Y H:i" }}
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <span class="badge bg-primary">Ingreso Hospitalario</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <h6 class="text-primary"><i class="bi bi-clipboard-pulse"></i> Motivo de Consulta:</h6>
+                                        <p class="ms-3">{{ ingreso.motivo_consulta }}</p>
+                                    </div>
+                                    
+                                    {% if ingreso.edad_gestacional_sem %}
+                                    <div class="col-md-6 mb-2">
+                                        <strong><i class="bi bi-calendar-week"></i> Edad Gestacional:</strong> 
+                                        <span class="badge bg-info">{{ ingreso.edad_gestacional_sem }} semanas</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if ingreso.derivacion %}
+                                    <div class="col-md-6 mb-2">
+                                        <strong><i class="bi bi-hospital"></i> Derivación:</strong> 
+                                        {{ ingreso.derivacion }}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if ingreso.observaciones %}
+                                    <div class="col-md-12 mt-2">
+                                        <h6 class="text-secondary"><i class="bi bi-journal-text"></i> Observaciones:</h6>
+                                        <p class="ms-3 text-muted">{{ ingreso.observaciones }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mt-3 pt-3 border-top">
+                                    <a href="{% url 'matrona:detalle_ingreso' ingreso.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Ver Detalle Completo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Sin registros:</strong> No hay historial clínico disponible para este paciente.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Asignar Patología -->
+<div class="modal fade" id="modalAsignarPatologia" tabindex="-1" aria-labelledby="modalAsignarPatologiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="modalAsignarPatologiaLabel">
+                    <i class="bi bi-plus-circle"></i> Asignar Patología al Paciente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-asignar-patologia" method="POST" action="{% url 'matrona:asignar_patologia' paciente.pk %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="buscar_patologia" class="form-label">Buscar Patología</label>
+                        <input type="text" class="form-control" id="buscar_patologia" 
+                               placeholder="Buscar por nombre o código CIE-10">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="patologia_select" class="form-label">Seleccione una Patología</label>
+                        <select class="form-select" id="patologia_select" name="patologia_id" required>
+                            <option value="">-- Seleccione --</option>
+                            {% for patologia in patologias_disponibles %}
+                            <option value="{{ patologia.id }}" 
+                                    data-nombre="{{ patologia.nombre }}"
+                                    data-cie="{{ patologia.codigo_cie_10 }}"
+                                    data-riesgo="{{ patologia.nivel_de_riesgo }}">
+                                {{ patologia.nombre }} - {{ patologia.codigo_cie_10 }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div id="info_patologia" class="alert alert-info d-none">
+                        <h6>Información de la Patología:</h6>
+                        <p class="mb-1"><strong>Nombre:</strong> <span id="info_nombre"></span></p>
+                        <p class="mb-1"><strong>CIE-10:</strong> <span id="info_cie"></span></p>
+                        <p class="mb-0"><strong>Nivel de Riesgo:</strong> <span id="info_riesgo"></span></p>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-check-circle"></i> Asignar Patología
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Eliminar patología asignada
+    function eliminarPatologia(patologiaId) {
+        if (confirm('¿Está seguro que desea eliminar esta patología del paciente?')) {
+            fetch(`/api/paciente/{{ paciente.pk }}/patologia/${patologiaId}/eliminar/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error al eliminar la patología');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar la patología');
+            });
+        }
+    }
+    
+    // Buscar patologías en el select
+    document.getElementById('buscar_patologia').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const select = document.getElementById('patologia_select');
+        const options = select.getElementsByTagName('option');
+        
+        for (let i = 1; i < options.length; i++) {
+            const option = options[i];
+            const text = option.text.toLowerCase();
+            
+            if (text.includes(searchTerm)) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+    
+    // Mostrar información de patología seleccionada
+    document.getElementById('patologia_select').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            document.getElementById('info_nombre').textContent = selectedOption.dataset.nombre;
+            document.getElementById('info_cie').textContent = selectedOption.dataset.cie;
+            document.getElementById('info_riesgo').textContent = selectedOption.dataset.riesgo;
+            document.getElementById('info_patologia').classList.remove('d-none');
+        } else {
+            document.getElementById('info_patologia').classList.add('d-none');
+        }
+    });
+    
+    // Función para obtener CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

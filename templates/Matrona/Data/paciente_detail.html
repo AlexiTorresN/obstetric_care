@@ -1,0 +1,58 @@
+{% extends 'Shared/base.html' %}
+{% load static %}
+
+{% block title %}Detalle del Paciente - Sistema Obstétrico{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-person-badge"></i> Ficha del Paciente
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Datos Personales -->
+                <div class="col-md-6 mb-3">
+                    <h5 class="text-danger border-bottom pb-2">Datos Personales</h5>
+                    <p><strong>RUT:</strong> {{ paciente.persona.Rut }}</p>
+                    <p><strong>Nombre Completo:</strong> {{ paciente.persona.Nombre }} {{ paciente.persona.Apellido }}</p>
+                    <p><strong>Sexo:</strong> {{ paciente.persona.Sexo }}</p>
+                    <p><strong>Fecha Nacimiento:</strong> {{ paciente.persona.Fecha_nacimiento|date:"d/m/Y" }}</p>
+                    <p><strong>Teléfono:</strong> {{ paciente.persona.Telefono|default:"No registrado" }}</p>
+                    <p><strong>Email:</strong> {{ paciente.persona.Email|default:"No registrado" }}</p>
+                    <p><strong>Dirección:</strong> {{ paciente.persona.Direccion|default:"No registrada" }}</p>
+                </div>
+                
+                <!-- Datos del Paciente -->
+                <div class="col-md-6 mb-3">
+                    <h5 class="text-danger border-bottom pb-2">Datos Obstétricos</h5>
+                    <p><strong>Edad:</strong> {{ paciente.Edad }} años</p>
+                    <p><strong>Estado Civil:</strong> {{ paciente.get_Estado_civil_display }}</p>
+                    <p><strong>Previsión:</strong> {{ paciente.get_Previcion_display }}</p>
+                    <p><strong>Acompañante:</strong> {{ paciente.Acompañante|default:"No registrado" }}</p>
+                    <p><strong>Contacto Emergencia:</strong> {{ paciente.Contacto_emergencia|default:"No registrado" }}</p>
+                    <p><strong>Fecha Registro:</strong> {{ paciente.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> 
+                <strong>Nota:</strong> Para agregar ingresos, patologías y tratamientos, utilice las opciones del menú de matrona.
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'matrona:lista_pacientes' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la Lista
+        </a>
+        <a href="{% url 'matrona:buscar_paciente' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-search"></i> Buscar Otro Paciente
+        </a>
+    </div>
+</div>
+{% endblock %}

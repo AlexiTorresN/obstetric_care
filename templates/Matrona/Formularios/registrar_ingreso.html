@@ -1,0 +1,204 @@
+{% extends 'Shared/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Ingreso - Sistema Obstétrico{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-door-open"></i>
+                        Registrar Ingreso Hospitalario
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        Complete los datos del ingreso hospitalario de la paciente. 
+                        El número de ficha se generará automáticamente.
+                    </div>
+                    
+                    <form method="POST" id="form-ingreso" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- RUT del Paciente -->
+                        <div class="mb-4">
+                            <label for="{{ form.rut_paciente.id_for_label }}" class="form-label">
+                                {{ form.rut_paciente.label }} <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                {{ form.rut_paciente }}
+                                <button class="btn btn-outline-secondary" type="button" id="btn-buscar-ingreso">
+                                    <i class="bi bi-search"></i> Buscar Paciente
+                                </button>
+                            </div>
+                            {% if form.rut_paciente.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.rut_paciente.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.rut_paciente.help_text }}</small>
+                        </div>
+                        
+                        <!-- Información del Paciente -->
+                        <div id="info-paciente" class="card bg-light d-none mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-person-check-fill text-success"></i> 
+                                    Paciente Encontrado
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Nombre:</strong> <span id="nombre-paciente"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>RUT:</strong> <span id="rut-paciente"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Edad:</strong> <span id="edad-paciente"></span> años
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Previsión:</strong> <span id="prevision-paciente"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h5 class="mb-3"><i class="bi bi-clipboard-plus"></i> Datos del Ingreso</h5>
+                        
+                        <!-- Motivo de Consulta -->
+                        <div class="mb-3">
+                            <label for="{{ form.motivo_consulta.id_for_label }}" class="form-label">
+                                {{ form.motivo_consulta.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.motivo_consulta }}
+                            {% if form.motivo_consulta.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.motivo_consulta.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Edad Gestacional y Derivación -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.edad_gestacional_sem.id_for_label }}" class="form-label">
+                                    {{ form.edad_gestacional_sem.label }}
+                                </label>
+                                <div class="input-group">
+                                    {{ form.edad_gestacional_sem }}
+                                    <span class="input-group-text">semanas</span>
+                                </div>
+                                {% if form.edad_gestacional_sem.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.edad_gestacional_sem.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Entre 1 y 42 semanas</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.derivacion.id_for_label }}" class="form-label">
+                                    {{ form.derivacion.label }}
+                                </label>
+                                {{ form.derivacion }}
+                                {% if form.derivacion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.derivacion.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Observaciones -->
+                        <div class="mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                {{ form.observaciones.label }}
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.observaciones.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Información adicional -->
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Nota:</strong> El número de ficha se generará automáticamente con el formato 
+                            F-AAAA-#### (Ejemplo: F-2025-0001)
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'matrona:lista_pacientes' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-door-open"></i> Registrar Ingreso
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Buscar paciente por RUT
+    document.getElementById('btn-buscar-ingreso').addEventListener('click', function() {
+        const rut = document.getElementById('rut_paciente_ingreso').value;
+        
+        if (!rut) {
+            alert('Por favor ingrese un RUT');
+            return;
+        }
+        
+        // Petición AJAX para buscar el paciente
+        fetch(`/api/paciente/buscar/?rut=${rut}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists && data.es_paciente) {
+                    // Mostrar información del paciente
+                    document.getElementById('nombre-paciente').textContent = data.nombre + ' ' + data.apellido;
+                    document.getElementById('rut-paciente').textContent = data.rut;
+                    document.getElementById('edad-paciente').textContent = data.edad;
+                    document.getElementById('prevision-paciente').textContent = data.prevision;
+                    document.getElementById('info-paciente').classList.remove('d-none');
+                } else if (data.exists && !data.es_paciente) {
+                    alert('Esta persona existe pero no está registrada como paciente');
+                    document.getElementById('info-paciente').classList.add('d-none');
+                } else {
+                    alert('No se encontró un paciente con ese RUT');
+                    document.getElementById('info-paciente').classList.add('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al buscar el paciente');
+            });
+    });
+    
+    // Validación del formulario
+    document.getElementById('form-ingreso').addEventListener('submit', function(e) {
+        const form = this;
+        
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+</script>
+{% endblock %}
