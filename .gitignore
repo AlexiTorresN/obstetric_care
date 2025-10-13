@@ -3,7 +3,16 @@
 # ========================
 
 # Byte-compiled / cache
+# ========================
+# PYTHON + DJANGO PROJECT
+# ========================
+
+# Byte-compiled / cache
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
 *.py[cod]
 *$py.class
 
@@ -26,7 +35,23 @@ static/
 # Django migrations (mantiene solo __init__.py)
 **/migrations/*
 !**/migrations/__init__.py
+ENV/
+env/
 
+# Django stuff
+*.log
+db.sqlite3
+media/
+staticfiles/
+static/
+*.pot
+*.pyc
+
+# Django migrations (mantiene solo __init__.py)
+**/migrations/*
+!**/migrations/__init__.py
+
+# IDE / Editor settings
 # IDE / Editor settings
 .vscode/
 .idea/
