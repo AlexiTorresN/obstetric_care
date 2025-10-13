@@ -1,0 +1,10 @@
+
+ojo ejecutar este comando antes de hacer run server para que se agregen las patologias 
+
+python manage.py cargar_patologias
+
+
+
+otyra cosa la base de datos de legaci esta en la carpeta Utildad
+legacy_obtetric 
+

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha {{ ficha.numero_ficha }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+<div class="container-fluid py-4">
+    
+    <!-- Header con información del paciente -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0">
+                    <i class="bi bi-file-medical"></i> 
+                    Ficha Obstétrica: {{ ficha.numero_ficha }}
+                </h4>
+                <small>Creada: {{ ficha.fecha_creacion|date:"d/m/Y H:i" }}</small>
+            </div>
+            <span class="badge {% if ficha.activa %}bg-success{% else %}bg-secondary{% endif %} fs-6">
+                {% if ficha.activa %}ACTIVA{% else %}INACTIVA{% endif %}
+            </span>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-person-fill"></i> Datos del Paciente</h5>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <th width="40%">RUT:</th>
+                            <td><strong>{{ paciente.persona.Rut }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Nombre Completo:</th>
+                            <td>{{ paciente.persona.Nombre }} {{ paciente.persona.Apellido_Paterno }} {{ paciente.persona.Apellido_Materno }}</td>
+                        </tr>
+                        <tr>
+                            <th>Edad:</th>
+                            <td>{{ paciente.Edad }} años</td>
+                        </tr>
+                        <tr>
+                            <th>Previsión:</th>
+                            <td>{{ paciente.get_Previcion_display }}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5><i class="bi bi-heart-pulse-fill"></i> Información Obstétrica</h5>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <th width="40%">Edad Gestacional:</th>
+                            <td>{{ ficha.get_edad_gestacional_completa }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fórmula Obstétrica:</th>
+                            <td><span class="badge bg-info fs-6">{{ ficha.get_formula_obstetrica }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Matrona Responsable:</th>
+                            <td>{{ ficha.matrona_responsable.persona.Nombre }} {{ ficha.matrona_responsable.persona.Apellido_Paterno }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo Parto:</th>
+                            <td>{{ ficha.get_tipo_parto_planificado_display }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs de navegación -->
+    <ul class="nav nav-tabs mb-3" id="fichaTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="medicamentos-tab" data-bs-toggle="tab" 
+                    data-bs-target="#medicamentos">
+                <i class="bi bi-capsule"></i> Medicamentos Prescritos 
+                <span class="badge bg-primary">{{ total_medicamentos }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tratamientos-tab" data-bs-toggle="tab" 
+                    data-bs-target="#tratamientos">
+                <i class="bi bi-clipboard2-pulse"></i> Tratamientos Aplicados 
+                <span class="badge bg-success">{{ total_tratamientos }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de los tabs -->
+    <div class="tab-content" id="fichaTabsContent">
+        
+        <!-- TAB: Medicamentos Prescritos -->
+        <div class="tab-pane fade show active" id="medicamentos" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-capsule"></i> Medicamentos Prescritos por Matrona</h5>
+                </div>
+                <div class="card-body">
+                    {% if medicamentos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Medicamento</th>
+                                        <th>Dosis</th>
+                                        <th>Vía</th>
+                                        <th>Frecuencia</th>
+                                        <th>Período</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for med in medicamentos %}
+                                    <tr>
+                                        <td><strong>{{ med.nombre_medicamento }}</strong></td>
+                                        <td>{{ med.dosis }}</td>
+                                        <td>{{ med.via_administracion }}</td>
+                                        <td>{{ med.frecuencia }}</td>
+                                        <td>
+                                            <small>
+                                                {{ med.fecha_inicio|date:"d/m/Y" }} 
+                                                → {{ med.fecha_termino|date:"d/m/Y" }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if med.activo %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactivo</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            No hay medicamentos prescritos en esta ficha.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Tratamientos Aplicados -->
+        <div class="tab-pane fade" id="tratamientos" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clipboard2-pulse"></i> Tratamientos Aplicados por TENS
+                    </h5>
+                    <a href="{% url 'tens:registrar_tratamiento_ficha' ficha.pk %}" 
+                       class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-lg"></i> Registrar Tratamiento
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if tratamientos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha y Hora</th>
+                                        <th>Medicamento</th>
+                                        <th>Dosis</th>
+                                        <th>Vía</th>
+                                        <th>TENS</th>
+                                        <th>Observaciones</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for trat in tratamientos %}
+                                    <tr class="{% if not trat.activo %}table-secondary{% endif %}">
+                                        <td>
+                                            <strong>{{ trat.fecha_aplicacion|date:"d/m/Y" }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ trat.hora_aplicacion|time:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <strong>{{ trat.nombre_medicamento }}</strong>
+                                            {% if trat.medicamento_ficha %}
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-link-45deg"></i> 
+                                                    Vinculado a prescripción
+                                                </small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ trat.dosis|default:"—" }}</td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ trat.get_via_administracion_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                {{ trat.tens.persona.Nombre }} 
+                                                {{ trat.tens.persona.Apellido_Paterno }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if trat.observaciones %}
+                                                <small>{{ trat.observaciones|truncatewords:10 }}</small>
+                                            {% else %}
+                                                <small class="text-muted">Sin observaciones</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                {% if trat.activo %}
+                                                    <a href="{% url 'tens:editar_tratamiento' tratamiento_pk=trat.pk %}" 
+                                                       class="btn btn-warning btn-sm" 
+                                                       title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'tens:eliminar_tratamiento' tratamiento_pk=trat.pk %}" 
+                                                       class="btn btn-danger btn-sm" 
+                                                       title="Eliminar"
+                                                       onclick="return confirm('¿Está seguro de eliminar este tratamiento?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{% url 'tens:restaurar_tratamiento' tratamiento_pk=trat.pk %}" 
+                                                       class="btn btn-success btn-sm" 
+                                                       title="Restaurar">
+                                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            No hay tratamientos aplicados en esta ficha todavía.
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'tens:registrar_tratamiento_ficha' ficha.pk %}" 
+                               class="btn btn-success">
+                                <i class="bi bi-plus-lg"></i> Registrar Primer Tratamiento
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="mt-4">
+        <a href="{% url 'tens:ver_fichas_paciente' paciente.pk %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a Fichas del Paciente
+        </a>
+        <a href="{% url 'tens:buscar_paciente' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-search"></i> Buscar Otro Paciente
+        </a>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .form-label {
+            font-weight: 600;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    
+    <!-- Header -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-syringe"></i> {{ titulo }}
+            </h4>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-file-medical"></i> Ficha: <strong>{{ ficha.numero_ficha }}</strong></h6>
+                </div>
+                <div class="col-md-6">
+                    <h6>
+                        <i class="fas fa-user-injured"></i> Paciente: 
+                        <strong>
+                            {{ paciente.persona.Nombre }} 
+                            {{ paciente.persona.Apellido_Paterno }} 
+                            {{ paciente.persona.Apellido_Materno }}
+                        </strong>
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <!-- Mensajes de error general -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ form.non_field_errors }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <!-- Nombre del Medicamento -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.nombre_medicamento.id_for_label }}" class="form-label">
+                            <i class="fas fa-pills"></i> {{ form.nombre_medicamento.label }} 
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.nombre_medicamento }}
+                        {% if form.nombre_medicamento.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.nombre_medicamento.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Dosis -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.dosis.id_for_label }}" class="form-label">
+                            <i class="fas fa-prescription-bottle"></i> {{ form.dosis.label }}
+                        </label>
+                        {{ form.dosis }}
+                        {% if form.dosis.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.dosis.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Ejemplo: 1 tableta, 5ml, 10 UI
+                        </small>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Vía de Administración -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.via_administracion.id_for_label }}" class="form-label">
+                            <i class="fas fa-route"></i> {{ form.via_administracion.label }} 
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.via_administracion }}
+                        {% if form.via_administracion.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.via_administracion.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Fecha de Aplicación -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.fecha_aplicacion.id_for_label }}" class="form-label">
+                            <i class="fas fa-calendar"></i> {{ form.fecha_aplicacion.label }} 
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.fecha_aplicacion }}
+                        {% if form.fecha_aplicacion.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.fecha_aplicacion.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Hora de Aplicación -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.hora_aplicacion.id_for_label }}" class="form-label">
+                            <i class="fas fa-clock"></i> {{ form.hora_aplicacion.label }} 
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.hora_aplicacion }}
+                        {% if form.hora_aplicacion.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.hora_aplicacion.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Medicamento de Ficha (Opcional) -->
+                <div class="mb-3">
+                    <label for="{{ form.medicamento_ficha.id_for_label }}" class="form-label">
+                        <i class="fas fa-link"></i> {{ form.medicamento_ficha.label }}
+                    </label>
+                    {{ form.medicamento_ficha }}
+                    {% if form.medicamento_ficha.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.medicamento_ficha.errors }}
+                        </div>
+                    {% endif %}
+                    {% if form.medicamento_ficha.help_text %}
+                        <small class="form-text text-muted d-block mt-1">
+                            <i class="fas fa-info-circle"></i> {{ form.medicamento_ficha.help_text }}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Observaciones -->
+                <div class="mb-3">
+                    <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                        <i class="fas fa-notes-medical"></i> {{ form.observaciones.label }}
+                    </label>
+                    {{ form.observaciones }}
+                    {% if form.observaciones.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.observaciones.errors }}
+                        </div>
+                    {% endif %}
+                    {% if form.observaciones.help_text %}
+                        <small class="form-text text-muted d-block mt-1">
+                            <i class="fas fa-info-circle"></i> {{ form.observaciones.help_text }}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Información adicional -->
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Importante:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Los campos marcados con <span class="text-danger">*</span> son obligatorios</li>
+                        <li>El tratamiento quedará registrado automáticamente en esta ficha obstétrica</li>
+                        <li>Asegúrese de verificar todos los datos antes de guardar</li>
+                    </ul>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'tens:detalle_ficha' ficha.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> 
+                        {% if tratamiento %}Actualizar{% else %}Registrar{% endif %} Tratamiento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Información del contexto -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-info-circle"></i> Información del Contexto</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Ficha:</strong> {{ ficha.numero_ficha }}</p>
+                    <p class="mb-1"><strong>Matrona Responsable:</strong> 
+                        {{ ficha.matrona_responsable.persona.Nombre }} 
+                        {{ ficha.matrona_responsable.persona.Apellido_Paterno }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Paciente:</strong> 
+                        {{ paciente.persona.Nombre }} 
+                        {{ paciente.persona.Apellido_Paterno }} 
+                        {{ paciente.persona.Apellido_Materno }}
+                    </p>
+                    <p class="mb-1"><strong>RUT:</strong> {{ paciente.persona.Rut }}</p>
+                    <p class="mb-1"><strong>Edad:</strong> {{ paciente.Edad }} años</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scripts adicionales -->
+<script>
+    // Establecer fecha y hora actual por defecto si están vacíos
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const fechaInput = document.getElementById('{{ form.fecha_aplicacion.id_for_label }}');
+        const horaInput = document.getElementById('{{ form.hora_aplicacion.id_for_label }}');
+        
+        if (fechaInput && !fechaInput.value) {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const localDateTime = new Date(now.getTime() - (offset * 60 * 1000));
+            fechaInput.value = localDateTime.toISOString().slice(0, 16);
+        }
+        
+        if (horaInput && !horaInput.value) {
+            const now = new Date();
+            horaInput.value = now.toTimeString().slice(0, 5);
+        }
+    });
+    
+    // Confirmar antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const medicamento = document.getElementById('{{ form.nombre_medicamento.id_for_label }}').value;
+        if (!confirm(`¿Confirma el registro del tratamiento: ${medicamento}?`)) {
+            e.preventDefault();
+        }
+    });
+</script>

@@ -1,0 +1,198 @@
+{% extends 'Shared/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            <!-- Encabezado -->
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-clipboard-check text-success" style="font-size: 2.5rem;"></i>
+                <h2 class="ms-3 mb-0">Registrar Administración de Medicamento</h2>
+            </div>
+
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Info del Paciente y Medicamento -->
+            <div class="card shadow mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Información
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Paciente:</strong> 
+                                {{ paciente.persona.Nombre }} {{ paciente.persona.Apellido_Paterno }}
+                            </p>
+                            <p class="mb-2"><strong>RUT:</strong> {{ paciente.persona.Rut }}</p>
+                            <p class="mb-2"><strong>Ficha:</strong> {{ ficha.numero_ficha }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Medicamento:</strong> {{ medicamento.nombre_medicamento }}</p>
+                            <p class="mb-2"><strong>Dosis:</strong> {{ medicamento.dosis }}</p>
+                            <p class="mb-2"><strong>Vía:</strong> {{ medicamento.via_administracion }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clipboard-data"></i> Datos de la Administración
+                    </h5>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Errores del Formulario -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Errores:</h6>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Fecha y Hora -->
+                        <div class="mb-3">
+                            <label for="{{ form.fecha_hora_administracion.id_for_label }}" class="form-label">
+                                {{ form.fecha_hora_administracion.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fecha_hora_administracion }}
+                            {% if form.fecha_hora_administracion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_hora_administracion.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Checkboxes -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    {{ form.se_realizo_lavado }}
+                                    <label class="form-check-label" for="{{ form.se_realizo_lavado.id_for_label }}">
+                                        {{ form.se_realizo_lavado.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    {{ form.administrado_exitosamente }}
+                                    <label class="form-check-label" for="{{ form.administrado_exitosamente.id_for_label }}">
+                                        {{ form.administrado_exitosamente.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo No Administración -->
+                        <div class="mb-3" id="motivo-container" style="display: none;">
+                            <label for="{{ form.motivo_no_administracion.id_for_label }}" class="form-label">
+                                {{ form.motivo_no_administracion.label }}
+                            </label>
+                            {{ form.motivo_no_administracion }}
+                            {% if form.motivo_no_administracion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.motivo_no_administracion.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                {{ form.observaciones.label }}
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.observaciones.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Reacciones Adversas -->
+                        <div class="mb-3">
+                            <label for="{{ form.reacciones_adversas.id_for_label }}" class="form-label">
+                                {{ form.reacciones_adversas.label }}
+                            </label>
+                            {{ form.reacciones_adversas }}
+                            {% if form.reacciones_adversas.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.reacciones_adversas.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'tens:detalle_ficha' ficha.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Registrar Administración
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Nota -->
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i>
+                <strong>Nota:</strong> Los campos marcados con <span class="text-danger">*</span> son obligatorios.
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mostrar/ocultar campo de motivo según checkbox
+const checkExitoso = document.getElementById('{{ form.administrado_exitosamente.id_for_label }}');
+const motivoContainer = document.getElementById('motivo-container');
+
+function toggleMotivo() {
+    if (checkExitoso.checked) {
+        motivoContainer.style.display = 'none';
+    } else {
+        motivoContainer.style.display = 'block';
+    }
+}
+
+checkExitoso.addEventListener('change', toggleMotivo);
+toggleMotivo(); // Ejecutar al cargar
+
+// Validación
+document.querySelector('.needs-validation').addEventListener('submit', function(e) {
+    if (!this.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    this.classList.add('was-validated');
+});
+
+console.log('✅ Formulario de administración cargado');
+</script>
+{% endblock %}
