@@ -6,45 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema Obstétrico - Hospital Herminda Martín{% endblock %}</title>
     
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- ✅ Bootstrap 5 CSS desde STATIC -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- ✅ CSS Personalizado -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="bi bi-hospital"></i> Sistema Obstétrico
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">
-                            <i class="bi bi-house"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'matrona:menu_matrona' %}">
-                            <i class="bi bi-heart-pulse"></i> Matrona
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'gestion:lista_personas' %}">
-                            <i class="bi bi-people"></i> Gestión
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include 'Shared/navbar.html' %}
     
     <!-- Mensajes -->
     {% if messages %}
@@ -60,7 +35,8 @@
     
     <!-- Contenido Principal -->
     <main class="container-fluid py-4">
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </main>
     
     <!-- Footer -->
@@ -70,8 +46,8 @@
         </div>
     </footer>
     
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ✅ Bootstrap 5 JS Bundle desde STATIC -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     
     <!-- jQuery (opcional) -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
