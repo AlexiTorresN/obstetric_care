@@ -1,131 +1,201 @@
-# medicoApp/management/commands/cargar_patologias.py
-"""
-Comando para cargar patologías obstétricas predefinidas
-Ejecutar: python manage.py cargar_patologias
-"""
+# ============================================
+# UBICACIÓN: medicoApp/management/commands/cargar_patologias.py
+# ============================================
+
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from medicoApp.models import Patologias
 
 
 class Command(BaseCommand):
-    help = 'Carga las patologías obstétricas predefinidas en el sistema'
+    help = 'Carga catálogo de patologías obstétricas predefinidas y las ACTIVA automáticamente'
 
-    def handle(self, *args, **kwargs):
-        patologias_data = [
-            {
-                'nombre': 'Hipertensión Preexistente',
-                'codigo_cie_10': 'O10',
-                'descripcion': 'Hipertensión arterial crónica que existía antes del embarazo o se diagnostica antes de las 20 semanas de gestación.',
-                'nivel_de_riesgo': 'Alto',
-                'protocolo_seguimiento': 'Control prenatal cada 2 semanas. Monitoreo de presión arterial semanal. Evaluación de función renal mensual. Doppler fetal mensual desde las 28 semanas. Ecografía de crecimiento fetal cada 3-4 semanas.'
-            },
-            {
-                'nombre': 'Diabetes Mellitus en el Embarazo',
-                'codigo_cie_10': 'O24',
-                'descripcion': 'Diabetes mellitus gestacional o diabetes preexistente que complica el embarazo, parto o puerperio.',
-                'nivel_de_riesgo': 'Alto',
-                'protocolo_seguimiento': 'Control prenatal cada 2 semanas hasta las 32 semanas, luego semanal. Hemoglucotest diario. Control con endocrinólogo mensual. Ecografía de crecimiento fetal cada 3-4 semanas. Perfil biofísico fetal desde las 32 semanas.'
-            },
-            {
-                'nombre': 'Preeclampsia',
-                'codigo_cie_10': 'O14',
-                'descripcion': 'Hipertensión gestacional con proteinuria significativa que aparece después de las 20 semanas de embarazo.',
-                'nivel_de_riesgo': 'Crítico',
-                'protocolo_seguimiento': 'Hospitalización según severidad. Control de presión arterial cada 4-6 horas. Monitoreo de síntomas (cefalea, alteraciones visuales, dolor epigástrico). Exámenes de laboratorio cada 48-72 horas. Evaluación fetal diaria. Considerar interrupción del embarazo según evolución.'
-            },
-            {
-                'nombre': 'Anemia en el Embarazo',
-                'codigo_cie_10': 'O99.0',
-                'descripcion': 'Anemia que complica el embarazo, parto o puerperio. Hemoglobina menor a 11 g/dL en primer y tercer trimestre, o menor a 10.5 g/dL en segundo trimestre.',
-                'nivel_de_riesgo': 'Medio',
-                'protocolo_seguimiento': 'Control prenatal mensual. Hemograma de control cada 4-6 semanas. Suplementación con hierro y ácido fólico. Evaluar causa de anemia. Derivar a hematología si anemia severa o no responde a tratamiento.'
-            },
-            {
-                'nombre': 'Enfermedades Endocrinas en el Embarazo',
-                'codigo_cie_10': 'O99.2',
-                'descripcion': 'Enfermedades del sistema endocrino que complican el embarazo, como hipotiroidismo, hipertiroidismo u otras alteraciones hormonales.',
-                'nivel_de_riesgo': 'Medio',
-                'protocolo_seguimiento': 'Control prenatal mensual. Control con endocrinólogo cada 6-8 semanas. Monitoreo de función tiroidea cada trimestre. Ajuste de medicación según evolución. Ecografía obstétrica según protocolo habitual.'
-            },
-            {
-                'nombre': 'Otras Complicaciones del Embarazo',
-                'codigo_cie_10': 'O26',
-                'descripcion': 'Otras complicaciones específicas del embarazo no clasificadas en otra parte, como hiperemesis gravídica, complicaciones venosas, infecciones del tracto urinario recurrentes.',
-                'nivel_de_riesgo': 'Medio',
-                'protocolo_seguimiento': 'Control prenatal según severidad. Manejo específico según complicación. Hidratación y tratamiento sintomático. Hospitalización si hay deshidratación o descompensación. Evaluación por especialista según necesidad.'
-            },
-            {
-                'nombre': 'Amenaza de Parto Prematuro',
-                'codigo_cie_10': 'O60',
-                'descripcion': 'Contracciones uterinas regulares que causan cambios cervicales antes de las 37 semanas de gestación.',
-                'nivel_de_riesgo': 'Alto',
-                'protocolo_seguimiento': 'Hospitalización para evaluación. Monitoreo de dinámica uterina. Evaluación cervical frecuente. Corticoides para maduración pulmonar si es pertinente. Tocolisis según protocolo. Reposo relativo. Control cada 1-2 semanas posterior al alta.'
-            },
-            {
-                'nombre': 'Restricción del Crecimiento Fetal',
-                'codigo_cie_10': 'O36.5',
-                'descripcion': 'Crecimiento fetal menor al percentil 10 para la edad gestacional.',
-                'nivel_de_riesgo': 'Alto',
-                'protocolo_seguimiento': 'Control prenatal cada 1-2 semanas. Ecografía de crecimiento cada 2-3 semanas. Doppler fetal semanal. Perfil biofísico fetal bisemanal. Monitoreo fetal intraparto estricto. Evaluar momento y vía de interrupción del embarazo.'
-            },
-            {
-                'nombre': 'Embarazo Múltiple',
-                'codigo_cie_10': 'O30',
-                'descripcion': 'Gestación de dos o más fetos.',
-                'nivel_de_riesgo': 'Alto',
-                'protocolo_seguimiento': 'Control prenatal cada 2-3 semanas hasta las 28 semanas, luego cada 2 semanas. Ecografía mensual para evaluar crecimiento. Monitoreo de complicaciones específicas (síndrome de transfusión feto-fetal en monocoriales). Determinar corionicidad tempranamente. Planificar vía de parto según presentación.'
-            },
-            {
-                'nombre': 'Placenta Previa',
-                'codigo_cie_10': 'O44',
-                'descripcion': 'Implantación anormal de la placenta en el segmento inferior uterino que cubre parcial o totalmente el orificio cervical interno.',
-                'nivel_de_riesgo': 'Crítico',
-                'protocolo_seguimiento': 'Reposo pélvico estricto (no tactos vaginales, no relaciones sexuales). Ecografía transvaginal para confirmar ubicación placentaria. Hospitalización si hay sangrado. Corticoides para maduración pulmonar a las 34 semanas. Cesárea electiva entre 36-37 semanas. Plan de atención con banco de sangre disponible.'
-            },
-            {
-                'nombre': 'Desprendimiento Prematuro de Placenta',
-                'codigo_cie_10': 'O45',
-                'descripcion': 'Separación prematura de la placenta normalmente insertada antes del nacimiento del feto.',
-                'nivel_de_riesgo': 'Crítico',
-                'protocolo_seguimiento': 'EMERGENCIA OBSTÉTRICA. Hospitalización inmediata. Monitoreo fetal continuo. Evaluación del estado materno (signos vitales, coagulación). Interrupción inmediata del embarazo según estabilidad materna y fetal. Vía de parto según condiciones obstétricas. Disponibilidad de transfusión sanguínea.'
-            },
-            {
-                'nombre': 'Infección del Tracto Urinario en Embarazo',
-                'codigo_cie_10': 'O23',
-                'descripcion': 'Infección del tracto urinario que complica el embarazo, incluyendo cistitis, pielonefritis o bacteriuria asintomática.',
-                'nivel_de_riesgo': 'Medio',
-                'protocolo_seguimiento': 'Urocultivo de control 1-2 semanas post-tratamiento. Profilaxis antibiótica si infecciones recurrentes. Evaluación de función renal. Control prenatal según protocolo habitual. Descartar diabetes gestacional. Derivar a urología si infecciones persistentes.'
-            },
-        ]
+    def handle(self, *args, **options):
+        try:
+            with transaction.atomic():
+                patologias_data = [
+                    {
+                        'codigo_cie10': 'O10.0',
+                        'nombre': 'Hipertensión Preexistente',
+                        'descripcion': 'Presión arterial elevada diagnosticada antes del embarazo o antes de las 20 semanas de gestación.',
+                        'nivel_de_riesgo': 'Alto',
+                        'protocolo_seguimiento': '''Control semanal de presión arterial
+- Monitoreo de proteinuria
+- Control de peso
+- Evaluación de edemas
+- Ultrasonografía doppler cada 4 semanas
+- Consulta con cardiólogo si PA > 160/110'''
+                    },
+                    {
+                        'codigo_cie10': 'O24.0',
+                        'nombre': 'Diabetes Gestacional',
+                        'descripcion': 'Intolerancia a la glucosa que se desarrolla durante el embarazo.',
+                        'nivel_de_riesgo': 'Alto',
+                        'protocolo_seguimiento': '''Control glicémico diario
+- Dieta balanceada supervisada por nutricionista
+- Control prenatal cada 2 semanas
+- Monitoreo fetal semanal desde las 32 semanas
+- Evaluación de crecimiento fetal mensual
+- Preparación para posible inducción a las 38-39 semanas'''
+                    },
+                    {
+                        'codigo_cie10': 'O14.0',
+                        'nombre': 'Preeclampsia Leve',
+                        'descripcion': 'Hipertensión con proteinuria después de las 20 semanas de gestación sin signos de severidad.',
+                        'nivel_de_riesgo': 'Alto',
+                        'protocolo_seguimiento': '''Hospitalización para evaluación inicial
+- Control de PA cada 4 horas
+- Análisis de proteinuria 24 horas
+- Perfil bioquímico completo semanal
+- Evaluación de bienestar fetal diario
+- Preparación para parto si aparecen signos de severidad'''
+                    },
+                    {
+                        'codigo_cie10': 'O14.1',
+                        'nombre': 'Preeclampsia Severa',
+                        'descripcion': 'Hipertensión con proteinuria y uno o más criterios de severidad.',
+                        'nivel_de_riesgo': 'Critico',
+                        'protocolo_seguimiento': '''Hospitalización INMEDIATA
+- Sulfato de magnesio profiláctico
+- Control PA continuo
+- Monitoreo fetal continuo
+- Laboratorios cada 12-24 horas
+- Maduración pulmonar si < 34 semanas
+- Interrupción del embarazo según protocolo'''
+                    },
+                    {
+                        'codigo_cie10': 'O42.0',
+                        'nombre': 'Rotura Prematura de Membranas',
+                        'descripcion': 'Ruptura de membranas antes del inicio del trabajo de parto.',
+                        'nivel_de_riesgo': 'Medio',
+                        'protocolo_seguimiento': '''Hospitalización
+- Reposo absoluto
+- Antibióticos profilácticos
+- Corticoides si < 34 semanas
+- Monitoreo de signos de infección
+- Temperatura cada 4 horas
+- Evaluación de FCF cada 8 horas'''
+                    },
+                    {
+                        'codigo_cie10': 'O60.0',
+                        'nombre': 'Trabajo de Parto Prematuro',
+                        'descripcion': 'Contracciones regulares con cambios cervicales antes de las 37 semanas.',
+                        'nivel_de_riesgo': 'Alto',
+                        'protocolo_seguimiento': '''Hospitalización
+- Tocolíticos según protocolo
+- Corticoides para maduración pulmonar
+- Sulfato de magnesio neuroprotección si < 32 semanas
+- Monitoreo continuo de contracciones y FCF
+- Evaluación cervical frecuente'''
+                    },
+                    {
+                        'codigo_cie10': 'O36.3',
+                        'nombre': 'Restricción del Crecimiento Intrauterino',
+                        'descripcion': 'Peso fetal estimado por debajo del percentil 10 para la edad gestacional.',
+                        'nivel_de_riesgo': 'Alto',
+                        'protocolo_seguimiento': '''Evaluación doppler semanal
+- Perfil biofísico 2 veces por semana
+- Control de movimientos fetales
+- Ultrasonografía de crecimiento cada 2 semanas
+- Evaluación de líquido amniótico
+- Hospitalización si deterioro'''
+                    },
+                    {
+                        'codigo_cie10': 'O36.5',
+                        'nombre': 'Anemia en el Embarazo',
+                        'descripcion': 'Hemoglobina < 11 g/dL en el primer trimestre o < 10.5 g/dL en segundo/tercer trimestre.',
+                        'nivel_de_riesgo': 'Bajo',
+                        'protocolo_seguimiento': '''Suplementación con hierro y ácido fólico
+- Control de hemograma mensual
+- Evaluación de adherencia al tratamiento
+- Investigar causa de anemia
+- Derivar a hematología si Hb < 7 g/dL
+- Considerar transfusión si Hb < 7 g/dL'''
+                    },
+                    {
+                        'codigo_cie10': 'O44.0',
+                        'nombre': 'Placenta Previa',
+                        'descripcion': 'Implantación de la placenta en el segmento inferior uterino cubriendo el orificio cervical interno.',
+                        'nivel_de_riesgo': 'Critico',
+                        'protocolo_seguimiento': '''REPOSO ABSOLUTO - Sin tacto vaginal
+- Hospitalización si sangrado
+- Ultrasonografía cada 4 semanas
+- Corticoides a las 34 semanas
+- Preparación para cesárea electiva 36-37 semanas
+- Banco de sangre disponible'''
+                    },
+                    {
+                        'codigo_cie10': 'O68.0',
+                        'nombre': 'Sufrimiento Fetal Agudo',
+                        'descripcion': 'Alteraciones en la frecuencia cardíaca fetal que indican compromiso fetal.',
+                        'nivel_de_riesgo': 'Critico',
+                        'protocolo_seguimiento': '''Monitoreo fetal continuo
+- Reposición de líquidos IV
+- Oxígeno materno
+- Cambios de posición materna
+- Preparación para parto de emergencia
+- Equipo neonatal en alerta'''
+                    }
+                ]
 
-        creadas = 0
-        actualizadas = 0
+                patologias_creadas = 0
+                patologias_existentes = 0
 
-        for data in patologias_data:
-            patologia, created = Patologias.objects.update_or_create(
-                codigo_cie_10=data['codigo_cie_10'],
-                defaults={
-                    'nombre': data['nombre'],
-                    'descripcion': data['descripcion'],
-                    'nivel_de_riesgo': data['nivel_de_riesgo'],
-                    'protocolo_seguimiento': data['protocolo_seguimiento'],
-                    'estado': 'Inactivo'  # Por defecto inactivas, el médico las activa
-                }
-            )
-            
-            if created:
-                creadas += 1
+                self.stdout.write(self.style.WARNING('\n📋 Iniciando carga de patologías obstétricas...'))
+
+                for data in patologias_data:
+                    patologia, created = Patologias.objects.get_or_create(
+                        codigo_cie_10=data['codigo_cie10'],
+                        defaults={
+                            'nombre': data['nombre'],
+                            'descripcion': data['descripcion'],
+                            'nivel_de_riesgo': data['nivel_de_riesgo'],
+                            'protocolo_seguimiento': data['protocolo_seguimiento'],
+                            'estado': True
+                        }
+                    )
+
+                    if created:
+                        patologias_creadas += 1
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f'  ✅ Creada y ACTIVADA: {data["codigo_cie10"]} - {data["nombre"]}'
+                            )
+                        )
+                    else:
+                        if not patologia.estado:
+                            patologia.estado = True
+                            patologia.save()
+                            self.stdout.write(
+                                self.style.SUCCESS(
+                                    f'  ✓ Activada: {data["codigo_cie10"]} - {data["nombre"]}'
+                                )
+                            )
+                            patologias_creadas += 1
+                        else:
+                            patologias_existentes += 1
+                            self.stdout.write(
+                                self.style.WARNING(
+                                    f'  ⚠️  Ya existe y está activa: {data["codigo_cie10"]} - {data["nombre"]}'
+                                )
+                            )
+
                 self.stdout.write(
-                    self.style.SUCCESS(f'✅ Creada: {patologia.nombre}')
+                    self.style.SUCCESS(
+                        f'\n✅ PROCESO COMPLETADO'
+                    )
                 )
-            else:
-                actualizadas += 1
+                self.stdout.write(f'  📊 Patologías creadas y activadas: {patologias_creadas}')
+                self.stdout.write(f'  📊 Patologías ya existentes: {patologias_existentes}')
+                self.stdout.write(f'  📊 Total en catálogo: {Patologias.objects.count()}')
                 self.stdout.write(
-                    self.style.WARNING(f'⚠️  Actualizada: {patologia.nombre}')
+                    self.style.SUCCESS(
+                        f'  ✅ Patologías activas disponibles: {Patologias.objects.filter(estado=True).count()}'
+                    )
                 )
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f'\n🎉 Proceso completado: {creadas} creadas, {actualizadas} actualizadas'
+        except Exception as e:
+            self.stdout.write(
+                self.style.ERROR(f'\n❌ Error al cargar patologías: {str(e)}')
             )
-        )
+            raise

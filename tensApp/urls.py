@@ -20,13 +20,13 @@ urlpatterns = [
     # ============================================
     # ADMINISTRACIÓN DE MEDICAMENTOS
     # ============================================
-    path('medicamento/<int:medicamento_pk>/administrar/', 
-        views.registrar_administracion, 
-        name='registrar_administracion'),
+    #path('medicamento/<int:medicamento_pk>/administrar/', 
+     #   views.registrar_administracion, 
+      #  name='registrar_administracion'),
     
-    path('ficha/<int:ficha_pk>/historial/', 
-        views.historial_administraciones, 
-        name='historial_administraciones'),
+    #path('ficha/<int:ficha_pk>/historial/', 
+     #   views.historial_administraciones, 
+      #  name='historial_administraciones'),
     
     # ============================================
     # API - Búsqueda rápida

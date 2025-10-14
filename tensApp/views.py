@@ -16,21 +16,31 @@ from tensApp.models import  RegistroTens
 from tensApp.models import Tratamiento_aplicado
 from gestionApp.forms.tens_forms import FormularioTratamientoAplicado
 from tensApp.models import Tratamiento_aplicado
+from gestionApp.models import Paciente
+from matronaApp.models import FichaObstetrica,MedicamentoFicha, AdministracionMedicamento
+
 # ============================================
 # MENÚ PRINCIPAL TENS
 # ============================================
 
 def menu_tens(request):
     """Menú principal del módulo TENS"""
+    
+    # Obtener la fecha de hoy
+    hoy = timezone.now().date()
+    
+    # Contar administraciones de hoy
+    administraciones_hoy = AdministracionMedicamento.objects.filter(
+        fecha_hora_administracion__date=hoy
+    ).count()
+    
     context = {
         'total_pacientes': Paciente.objects.filter(activo=True).count(),
         'total_fichas_activas': FichaObstetrica.objects.filter(activa=True).count(),
-        'administraciones_hoy': AdministracionMedicamento.objects.filter(
-            fecha_hora_administracion__date=timezone.now().date()
-        ).count(),
+        'administraciones_hoy': administraciones_hoy,
     }
-    return render(request, 'tens/data/menu_tens.html', context)
-
+    
+    return render(request, 'Tens/Data/menu_tens.html', context)
 
 # ============================================
 # BÚSQUEDA DE PACIENTES
@@ -111,17 +121,14 @@ def ver_fichas_paciente(request, paciente_pk):
         num_medicamentos=Count('medicamentos', filter=Q(medicamentos__activo=True))
     ).order_by('-fecha_creacion')
     
-    return render(request, 'tens/ver_fichas.html', {
+    return render(request, 'tens/Data/ver_fichas.html', {
         'paciente': paciente,
         'fichas': fichas
     })
 
 
 def detalle_ficha_tens(request, ficha_pk):
-    """
-    Ver detalle de una ficha obstétrica (SOLO LECTURA para TENS)
-    Muestra los medicamentos asignados con su historial de administraciones
-    """
+    """Detalle de ficha obstétrica, medicamentos y tratamientos aplicados"""
     ficha = get_object_or_404(
         FichaObstetrica.objects.select_related(
             'paciente__persona',
@@ -129,32 +136,34 @@ def detalle_ficha_tens(request, ficha_pk):
         ),
         pk=ficha_pk
     )
-    
-    # Obtener medicamentos activos con sus administraciones
+
+    # Medicamentos prescritos
     medicamentos = MedicamentoFicha.objects.filter(
         ficha=ficha,
         activo=True
-    ).prefetch_related(
-        Prefetch(
-            'administraciones',
-            queryset=AdministracionMedicamento.objects.select_related('tens__persona').order_by('-fecha_hora_administracion')[:5]
-        )
     ).order_by('-fecha_inicio')
-    
+
+    # Tratamientos aplicados por TENS
+    tratamientos = Tratamiento_aplicado.objects.filter(
+        ficha=ficha,
+        activo=True
+    ).select_related(
+        'tens__persona',
+        'medicamento_ficha'
+    ).order_by('-fecha_aplicacion', '-hora_aplicacion')
+
     # Estadísticas
     total_medicamentos = medicamentos.count()
-    total_administraciones = AdministracionMedicamento.objects.filter(
-        medicamento_ficha__ficha=ficha
-    ).count()
-    
-    return render(request, 'tens/detalle_ficha.html', {
+    total_tratamientos = tratamientos.count()
+
+    return render(request, 'tens/formularios/detalle_ficha.html', {
         'ficha': ficha,
         'paciente': ficha.paciente,
         'medicamentos': medicamentos,
+        'tratamientos': tratamientos,
         'total_medicamentos': total_medicamentos,
-        'total_administraciones': total_administraciones,
+        'total_tratamientos': total_tratamientos,
     })
-
 
 # ============================================
 # ADMINISTRACIÓN DE MEDICAMENTOS
@@ -203,7 +212,7 @@ def registrar_administracion(request, medicamento_pk):
             'fecha_hora_administracion': timezone.now()
             })
             
-    return render(request, 'tens/registrar_administracion.html', {
+    return render(request, 'Tens/Formularios/registrar_administracion.html', {
         'form': form,
         'medicamento': medicamento_ficha,
         'ficha': medicamento_ficha.ficha,
