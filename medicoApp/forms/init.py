@@ -1,9 +1,8 @@
 """
 Importaciones centralizadas de formularios de medicoApp
 """
-from .patologia_forms import RegistrarPatologiaForm, EditarPatologiaForm
+from .Patologias_form import PatologiasForm
 
 __all__ = [
-    'RegistrarPatologiaForm',
-    'EditarPatologiaForm',
+    'PatologiasForm',
 ]

@@ -4,21 +4,26 @@ URLs para la gestión del catálogo de patologías
 from django.urls import path
 from . import views
 
-app_name = 'medico'
+app_name = 'medico'  # ✅ ESTO ES CRÍTICO
 
 urlpatterns = [
     # ============================================
-    # RUTAS DE PATOLOGÍAS
+    # MENÚ PRINCIPAL
     # ============================================
-    path('patologias/', views.PatologiaListView.as_view(), name='lista_patologias'),
-    path('patologia/<int:pk>/', views.PatologiaDetailView.as_view(), name='detalle_patologia'),
-    path('patologia/registrar/', views.registrar_patologia, name='registrar_patologia'),
-    path('patologia/<int:pk>/editar/', views.editar_patologia, name='editar_patologia'),
+    path('', views.menu_medico, name='menu_medico'),
     
     # ============================================
-    # API REST (AJAX)
+    # GESTIÓN DE PATOLOGÍAS
     # ============================================
-    path('api/patologia/<int:pk>/cambiar-estado/', 
-        views.cambiar_estado_patologia, 
-        name='api_cambiar_estado_patologia'),
+    path('patologias/', views.listar_patologias, name='listar_patologias'),
+    path('patologia/registrar/', views.registrar_patologia, name='registrar_patologia'),
+    path('patologia/<int:pk>/', views.detalle_patologia, name='detalle_patologia'),
+    path('patologia/<int:pk>/editar/', views.editar_patologia, name='editar_patologia'),
+    path('patologia/<int:pk>/toggle/', views.toggle_patologia, name='toggle_patologia'),
+    
+    # ============================================
+    # CONSULTA DE HISTORIAL CLÍNICO (NUEVO)
+    # ============================================
+    path('paciente/buscar/', views.buscar_paciente_medico, name='buscar_paciente'),
+    path('paciente/<int:paciente_pk>/historial/', views.ver_historial_clinico, name='historial_clinico'),
 ]

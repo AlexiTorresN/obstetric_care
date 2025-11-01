@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'medicoApp',
     'tensApp',
     'gestionApp',
+    'legacyApp',
+    'partosApp',
 ]
 
 MIDDLEWARE = [
@@ -77,17 +79,35 @@ WSGI_APPLICATION = 'obstetric_care.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-import pymysql 
+import pymysql
 pymysql.install_as_MySQLdb()
+
 DATABASES = {
+    # Base principal del sistema (es la que usa Django para migraciones nuevas)
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'obstetric_carebdd',
         'USER': 'root',
-        'PASSWORD':'12345678',
-    }
+        'PASSWORD': '12345678',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
+    },
+
+    # Base histórica (solo lectura)
+    'legacy': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'legacy_obstetric',
+        'USER': 'root',
+        'PASSWORD': '12345678',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
+    },
 }
+
+# Router para impedir migraciones y escrituras en la base legacy
+DATABASE_ROUTERS = ['obstetric_care.dbrouters.LegacyRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

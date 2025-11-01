@@ -1,11 +1,9 @@
 """
 Importaciones centralizadas de formularios de gestionApp
 """
-from .Gestion_form import Persona, BuscarPersonaForm, MedicoForm, MatronaForm, TensForm, PersonaForm, PacienteForm
-from .persona_forms import PersonaForm, BuscarPersonaForm
+from .Gestion_form import Persona, MedicoForm, MatronaForm, TensForm, PersonaForm, PacienteForm
 from .medico_forms import MedicoForm
 from .matrona_forms import MatronaForm
-from .tens_forms import TensForm  # ← Importar de gestionApp.forms.tens_forms
 
 
 

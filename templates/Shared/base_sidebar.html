@@ -1,0 +1,421 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema Obstétrico - Hospital Herminda Martín{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min2.css' %}">
+    
+    <style>
+        :root {
+            --sidebar-width: 220px;
+            --sidebar-bg: #1e293b;
+            --sidebar-hover: #334155;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+            font-size: 0.875rem;
+        }
+        
+        /* Sidebar Styles - Compacto */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            padding: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar.collapsed {
+            margin-left: calc(-1 * var(--sidebar-width));
+        }
+        
+        .sidebar-header {
+            padding: 1rem 0.875rem;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sidebar-brand {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .sidebar-brand i {
+            font-size: 1.3rem;
+        }
+        
+        .sidebar-brand small {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0.75rem 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            margin: 0;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.65rem 1rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            font-size: 0.85rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: var(--sidebar-hover);
+            color: white;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .sidebar-menu a i {
+            width: 20px;
+            margin-right: 0.625rem;
+            font-size: 1rem;
+        }
+        
+        .sidebar-menu .badge {
+            margin-left: auto;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Top Header - Compacto */
+        .top-header {
+            background: white;
+            padding: 0.75rem 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0.375rem;
+            border-radius: 0.325rem;
+            transition: all 0.2s;
+        }
+        
+        .menu-toggle:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        
+        .search-input {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.875rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .user-info .user-details {
+            font-size: 0.8rem;
+        }
+        
+        .user-info .user-details .user-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .user-info .user-details .user-role {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 1.1rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.35rem;
+        }
+        
+        /* Content Area - Compacto */
+        .content-area {
+            padding: 1.25rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: calc(-1 * var(--sidebar-width));
+            }
+            
+            .sidebar.active {
+                margin-left: 0;
+            }
+            
+            .sidebar-close {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-area {
+                padding: 0.875rem;
+            }
+            
+            .top-header {
+                padding: 0.625rem 1rem;
+            }
+        }
+        
+        /* Footer - Compacto */
+        .main-footer {
+            background: white;
+            padding: 1rem 1.25rem;
+            margin-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">
+                <i class="bi bi-hospital"></i>
+                <div>
+                    <div>Sistema Obstétrico</div>
+                    <small>H. Herminda Martín</small>
+                </div>
+            </a>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li>
+                <a href="/" class="active">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'matrona:lista_pacientes' %}">
+                    <i class="bi bi-people"></i>
+                    <span>Pacientes</span>
+                    <span class="badge bg-danger">{{ total_pacientes|default:45 }}</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'gestion:lista_personas' %}">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Gestión Personal</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'medico:lista_patologias' %}">
+                    <i class="bi bi-journal-medical"></i>
+                    <span>Patologías</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'matrona:registrar_paciente' %}">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Nueva Paciente</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Reportes</span>
+                </a>
+            </li>
+            <li style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem;">
+                <a href="#">
+                    <i class="bi bi-gear"></i>
+                    <span>Configuración</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="d-flex align-items-center gap-2">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <input type="text" class="form-control search-input" placeholder="Buscar paciente, RUT, patología... (Ctrl+K)" style="max-width: 350px;">
+            </div>
+            
+            <div class="user-info">
+                <div class="position-relative notification-icon">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
+                        3
+                    </span>
+                </div>
+                <div class="user-avatar">JP</div>
+                <div class="d-none d-md-block user-details">
+                    <div class="user-name">Dr. Juan Pérez</div>
+                    <div class="user-role">Médico</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mensajes -->
+        {% if messages %}
+        <div class="content-area pb-0">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show py-2" role="alert" style="font-size: 0.85rem;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.5rem;"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Main Content Area -->
+        <div class="content-area">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <!-- Footer -->
+        <footer class="main-footer">
+            <p class="mb-0">© 2025 Hospital Clínico Herminda Martín - Sistema de Trazabilidad Obstétrica</p>
+        </footer>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        
+        menuToggle.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            }
+        });
+        
+        sidebarClose.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+        });
+        
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
